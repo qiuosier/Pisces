@@ -6,7 +6,7 @@
         },
         {
             "name": "gcr.io/cloud-builders/gsutil",
-            "args": ["cp", "gs://qqin.page/Pisces/private.py", "rhythm/private.py"],
+            "args": ["cp", "gs://qqin.page/Pisces/private.py", "Pisces/private.py"],
             "timeout": "600s"
         },
         {
