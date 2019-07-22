@@ -1,0 +1,18 @@
+{
+    "steps": [
+        {
+            "name": "gcr.io/cloud-builders/git",
+            "args": ["submodule", "update", "--init", "--recursive"]
+        },
+        {
+            "name": "gcr.io/cloud-builders/gsutil",
+            "args": ["cp", "gs://qqin.page/Pisces/private.py", "rhythm/private.py"],
+            "timeout": "600s"
+        },
+        {
+            "name": "gcr.io/cloud-builders/gcloud",
+            "args": ["app", "deploy"],
+            "timeout": "600s"
+        }
+    ]
+}
