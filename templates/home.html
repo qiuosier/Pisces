@@ -2,17 +2,6 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
-<h4>Select Your Healthcare Provider</h4>
-<p>Your will be redirected to the authentication page from your healthcare provider.</p>
-<div class="row">
-    {% for provider in providers %}
-    <div class="col-md-3 md-container">
-        <div class="md-raised-6px" style="height: 80px">
-            <a href="{% url 'pisces:authenticate' %}?provider={{ provider.OrganizationName }}">
-                {{ provider.OrganizationName }}
-            </a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+<h4>Hello, {{ patient }}</h4>
+<p>{{ access_token }}</p>
 {% endblock %}
