@@ -326,7 +326,9 @@
         },
         {
             "OrganizationName": "Duke Health",
-            "FHIRPatientFacingURI": "https://health-apis.duke.edu/FHIR/patient/DSTU2/"
+            "FHIRPatientFacingURI": "https://health-apis.duke.edu/FHIR/patient/DSTU2/",
+            "authorize": "https://health-apis.duke.edu/Interconnect-FHIR/oauth2/authorize",
+            "token": "https://health-apis.duke.edu/Interconnect-FHIR/oauth2/authorize"
         },
         {
             "OrganizationName": "DuPage Medical Group",
