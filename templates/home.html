@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <dl>
+        {% for provider in providers %}
+        <dt>{{ provider.OrganizationName }}</dt>
+        <dd>{{ provider.FHIRPatientFacingURI }}</dd>
+        {% endfor %}
+      </dl>
+</div>
+{% endblock %}
