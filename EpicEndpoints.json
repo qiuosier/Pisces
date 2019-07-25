@@ -2,7 +2,7 @@
     "Entries": [
         {
             "OrganizationName": "Demo",
-            "FHIRPatientFacingURI": "https://open-ic.epic.com/argonaut/api/FHIR/Argonaut/"
+            "FHIRPatientFacingURI": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/"
         },
         {
             "OrganizationName": "Access Community Health Network",
