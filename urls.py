@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^authenticate/$', views.authenticate, name='authenticate'),
     url(r'^home/$', views.home, name='home'),
     url(r'^observations/$', views.observations, name='observations'),
+    url(r'^logout/$', views.logout, name='logout'),
 ]
