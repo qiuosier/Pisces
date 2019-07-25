@@ -28,6 +28,10 @@
             &copy; 2015-2019
             <a href="https://qqin.page/page/about/">Qiu Qin</a>.
             <a href="https://qqin.page/page/privacy/">Privacy</a>
+            |
+            {% if request.session.access_token %}
+            <a href="{% url 'pisces:logout' %}">Logout</a>
+            {% endif %}
         </p>
     </div>
 </footer>
