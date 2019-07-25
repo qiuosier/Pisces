@@ -3,12 +3,16 @@ import json
 import requests
 from lxml import etree
 from django.conf import settings
+from Aries.web import WebAPI
 
 
 def load_providers():
     with open(os.path.join(settings.BASE_DIR, "Pisces", "EpicEndpoints.json")) as endpoint_json:
         providers = json.load(endpoint_json).get("Entries")
     return providers
+
+
+PROVIDERS = load_providers()
 
 
 def request_endpoint(meta_url, endpoint_name):
@@ -28,8 +32,7 @@ def request_endpoint(meta_url, endpoint_name):
 
 
 def get_endpoint(provider, endpoint_name=None):
-    providers = load_providers()
-    for entry in providers:
+    for entry in PROVIDERS:
         if entry.get("OrganizationName") == provider:
             if not endpoint_name:
                 return entry.get("FHIRPatientFacingURI")
@@ -40,3 +43,14 @@ def get_endpoint(provider, endpoint_name=None):
                 if meta_url:
                     return request_endpoint(meta_url + "metadata", endpoint_name)
     return None
+
+
+def initialize_api(request):
+    provider = request.session.get("provider")
+    access_token = request.session.get("access_token")
+    web_api = WebAPI(get_endpoint(provider))
+    web_api.add_header(
+        Accept="application/json",
+        Authorization="Bearer %s" % access_token
+    )
+    return web_api
