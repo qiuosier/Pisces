@@ -4,8 +4,15 @@
 <h1>{{ title }}</h1>
 <h4>Select Your Healthcare Provider</h4>
 <p>Your will be redirected to the authentication page from your healthcare provider.</p>
+{% if errors %}
+    <div class="alert alert-danger">
+        <strong>Error:</strong><br/>
+        {{ errors }}
+    </div>
+{% endif %}
 <div class="row">
     {% for provider in providers %}
+    {% if provider.OrganizationName in top_providers %}
     <div class="col-md-3 md-container">
         <div class="md-raised-6px" style="height: 80px">
             <a href="{% url 'pisces:authenticate' %}?provider={{ provider.OrganizationName }}">
@@ -13,6 +20,21 @@
             </a>
         </div>
     </div>
+    {% endif %}
+    {% endfor %}
+</div>
+<hr />
+<div class="row">
+    {% for provider in providers %}
+    {% if provider.OrganizationName not in top_providers %}
+    <div class="col-md-3 md-container">
+        <div class="md-raised-6px" style="height: 80px">
+            <a href="{% url 'pisces:authenticate' %}?provider={{ provider.OrganizationName }}">
+                {{ provider.OrganizationName }}
+            </a>
+        </div>
+    </div>
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}
