@@ -8,8 +8,10 @@ def authentication_required(function=None):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             session = request.session
-            if session.get("provider") and session.get("patient") and session.get("access_token"):
+            if session.get("provider") and session.get("patient_id") and session.get("patient") and session.get("access_token"):
                 return view_func(request, *args, **kwargs)
+            # Clear the session if authentication failed.
+            request.session.flush()
             return HttpResponseRedirect(reverse("pisces:index"))
         return _wrapped_view
     if function:
