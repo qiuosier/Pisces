@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
-<h4>Hello, {{ patient }}</h4>
+<h4>Hello, {{ request.session.patient.name.0.text }}</h4>
 <p>Total: {{ total }}</p>
 <div class="row">
     {% for entry in entries %}
