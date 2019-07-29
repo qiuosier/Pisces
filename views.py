@@ -7,10 +7,10 @@ import logging
 from lxml import etree
 from django.conf import settings
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from rhythm.private import EPIC_TEST_ID, EPIC_CLIENT_ID, EPIC_REDIRECT_URL
 from Pisces.decorators import authentication_required
-from Pisces import endpoints
+from Pisces import endpoints, observations
 logger = logging.getLogger(__name__)
 
 
@@ -100,7 +100,7 @@ def home(request):
     resources = [
         {
             "name": "Laboratory Results",
-            "link": "observations"
+            "link": "observations/Laboratory"
         }
     ]
     return render(request, "home.html", {
@@ -111,15 +111,26 @@ def home(request):
 
 
 @authentication_required
-def observations(request):
+def view_observations(request, category):
+    observation_class = getattr(observations, category)
+    if not observation_class:
+        return HttpResponseBadRequest("%s is not supported." % category)
     patient_id = request.session.get("patient_id")
     api = endpoints.initialize_api(request)
-    response = api.get("Observation", patient=patient_id, category="Laboratory")
-    print(response.content)
-
-    entries = response.json().get("entry")
+    response = api.get("Observation", patient=patient_id, category=category)
+    logger.debug(response.content)
+    entries = None
+    try:
+        data = response.json()
+        entries = data.get("entry")
+    except:
+        pass
+    if not entries:
+        return HttpResponse("Failed to obtain %s data." % category)
+    groups = observation_class(entries).group_by_code()
     return render(request, "observations.html", {
         "title": "Observations",
-        "entries": entries,
-        "total": response.json().get("total")
+        "data": data,
+        "groups": groups,
+        "total": len(groups.keys())# response.json().get("total")
     })
