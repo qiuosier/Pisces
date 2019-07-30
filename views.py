@@ -135,5 +135,27 @@ def view_observations(request, category):
         "title": "Observations",
         "data": data,
         "groups": groups,
-        "total": len(groups.keys())# response.json().get("total")
+        "total": len(groups.keys())
+    })
+
+
+@authentication_required
+def view_laboratory(request, code):
+    patient_id = request.session.get("patient_id")
+    api = endpoints.initialize_api(request)
+    response = api.get("Observation", patient=patient_id, category="Laboratory")
+    logger.debug(response.content)
+    entries = None
+    try:
+        data = response.json()
+        entries = data.get("entry")
+    except:
+        pass
+    if not entries:
+        return HttpResponse("Failed to obtain Laboratory data.")
+    groups = observations.Laboratory(entries).group_by_code()
+    return render(request, "observations.html", {
+        "title": "Observations",
+        "data": data,
+        "resources": groups.get(code),
     })

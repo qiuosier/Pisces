@@ -3,25 +3,37 @@
 {% block content %}
 <h1>{{ title }}</h1>
 <h4>Hello, {{ request.session.patient.name.0.text }}</h4>
+{% if total %}
 <p>Total: {{ total }}</p>
+{% endif %}
 
 {% if groups %}
 <div class="row">
     {% for code, resources in groups.items %}
     <div class="col-md-6 md-container">
         <div class="md-raised-6px" style="height: 100%">
-            <h4>{{ resources.0.code.text }}</h4>
-            {% if resources|length > 0 %}
-                {{ resources.plot.to_html|safe }}
-            {% else %}
-
-            {% endif %}
-
-            {% for reference in entry.resource.referenceRange %}
+            <h4><a href="{% url 'pisces:laboratory' code %}">{{ resources.0.code.text }}</a></h4>
+            <p>{{ resources|length }} results</p>
+            {% for reference in resources.0.referenceRange %}
             <p><i class="text-muted">{{ reference.text }}</i></p>
             {% endfor %}
         </div>
     </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if resources %}
+<a href="{% url 'pisces:observations' 'Laboratory' %}">Laboratory Results</a>
+<div class="md-raised-6px">
+    <h4>{{ resources.0.code.text }}</h4>
+    {% if resources|length > 0 %}
+        {{ resources.plot.to_html|safe }}
+    {% else %}
+
+    {% endif %}
+    {% for reference in entry.resource.referenceRange %}
+    <p><i class="text-muted">{{ reference.text }}</i></p>
     {% endfor %}
 </div>
 {% endif %}
