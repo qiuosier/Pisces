@@ -61,6 +61,7 @@ def index(request):
         logger.debug(token_json)
         request.session["access_token"] = token_json.get("access_token")
         request.session["patient_id"] = token_json.get("patient")
+        request.session["patient"] = get_patient_info(request)
         if request.session["access_token"] and request.session["patient_id"]:
             return redirect("pisces:home")
         return HttpResponse("Authentication Failed.")
