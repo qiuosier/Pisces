@@ -65,7 +65,7 @@ class Laboratory:
                 resources.append(resource)
                 groups[code] = resources
             if not codes:
-                text = [html.escape(resource.get("code", dict()).get("text"))]
+                text = html.escape(resource.get("code", dict()).get("text"))
                 resources = groups.get(text, Resources())
                 resources.append(resource)
                 groups[text] = resources
