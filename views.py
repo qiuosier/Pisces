@@ -86,6 +86,7 @@ def authenticate(request):
         request.session["access_token"] = "X"
         request.session["patient_id"] = "Tbt3KuCY0B5PSrJvCu2j-PlK.aiHsu2xUjUM8bWpetXoB"
         request.session["patient"] = get_patient_info(request)
+        request.session["expiration"] = timezone.now() + timezone.timedelta(seconds=3500)
         return redirect("pisces:home")
     authorize_endpoint = endpoints.get_endpoint(provider, "authorize")
     if not authorize_endpoint:

@@ -59,11 +59,14 @@ class Laboratory:
             if not resource:
                 continue
             codes = resource.get("code", dict()).get("coding", [])
-            if not codes:
-                codes = [html.escape(resource.get("code", dict()).get("text"))]
             for code_dict in codes:
                 code = code_dict.get("code")
                 resources = groups.get(code, Resources())
                 resources.append(resource)
                 groups[code] = resources
+            if not codes:
+                text = [html.escape(resource.get("code", dict()).get("text"))]
+                resources = groups.get(text, Resources())
+                resources.append(resource)
+                groups[text] = resources
         return groups
