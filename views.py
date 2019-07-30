@@ -23,7 +23,8 @@ def exchange_token(provider, authorization_code):
         "redirect_uri": EPIC_REDIRECT_URL,
         "client_id": client_id
     }
-    response = requests.post(token_endpoint, data)
+    response = requests.post(token_endpoint, data, headers=dict(Accept="application/json"))
+    logger.debug(response.content)
     token_json = response.json()
     return token_json
 
@@ -57,6 +58,7 @@ def index(request):
     provider = request.session.get("provider")
     if authorization_code and provider:
         token_json = exchange_token(provider, authorization_code)
+        logger.debug(token_json)
         request.session["access_token"] = token_json.get("access_token")
         request.session["patient_id"] = token_json.get("patient")
         if request.session["access_token"] and request.session["patient_id"]:
