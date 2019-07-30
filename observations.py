@@ -1,3 +1,4 @@
+import html
 from Aries.visual.plotly import PlotlyFigure
 
 
@@ -58,6 +59,8 @@ class Laboratory:
             if not resource:
                 continue
             codes = resource.get("code", dict()).get("coding", [])
+            if not codes:
+                codes = [html.escape(resource.get("code", dict()).get("text"))]
             for code_dict in codes:
                 code = code_dict.get("code")
                 resources = groups.get(code, Resources())
