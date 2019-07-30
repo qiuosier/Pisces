@@ -8,6 +8,7 @@ from lxml import etree
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.utils import timezone
 from rhythm.private import EPIC_TEST_ID, EPIC_CLIENT_ID, EPIC_REDIRECT_URL
 from Pisces.decorators import authentication_required
 from Pisces import endpoints, observations
@@ -62,6 +63,7 @@ def index(request):
         request.session["access_token"] = token_json.get("access_token")
         request.session["patient_id"] = token_json.get("patient")
         request.session["patient"] = get_patient_info(request)
+        request.session["expiration"] = timezone.now() + timezone.timedelta(seconds=3500)
         if request.session["access_token"] and request.session["patient_id"]:
             return redirect("pisces:home")
         return HttpResponse("Authentication Failed.")
