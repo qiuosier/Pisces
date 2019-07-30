@@ -11,10 +11,11 @@
     <div class="col-md-6 md-container">
         <div class="md-raised-6px" style="height: 100%">
             <h4>{{ resources.0.code.text }}</h4>
-            {% for resource in resources %}
-                <p>{{ resource.effectiveDateTime }}: {{ resource.valueQuantity.value }}</p>
-            {% endfor %}
-            {{ resources.plot.to_html|safe }}
+            {% if resources|length > 0 %}
+                {{ resources.plot.to_html|safe }}
+            {% else %}
+
+            {% endif %}
 
             {% for reference in entry.resource.referenceRange %}
             <p><i class="text-muted">{{ reference.text }}</i></p>
