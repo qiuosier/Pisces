@@ -1,3 +1,4 @@
+import datetime
 from functools import wraps
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -13,8 +14,10 @@ def authentication_required(function=None):
                     and session.get("patient_id") \
                     and session.get("patient") \
                     and session.get("access_token") \
-                    and session.get("expiration") > timezone.now():
-                return view_func(request, *args, **kwargs)
+                    and session.get("expiration"):
+                expiration = session.get("expiration")
+                if isinstance(expiration, datetime.datetime) and expiration > timezone.now():
+                    return view_func(request, *args, **kwargs)
             # Clear the session if authentication failed.
             request.session.flush()
             return HttpResponseRedirect(reverse("pisces:index"))
