@@ -157,8 +157,8 @@ def view_laboratory(request, code):
     if not entries:
         return HttpResponse("Failed to obtain Laboratory data.")
     groups = observations.Laboratory(entries).group_by_code()
-    return render(request, "observations.html", {
-        "title": "Observations",
+    return render(request, "results.html", {
+        "title": "Laboratory Results",
         "data": data,
         "resources": groups.get(code),
     })

@@ -68,6 +68,8 @@ class Laboratory:
                 text = resource.get("code", dict()).get("text")
                 if text:
                     html.escape(text)
+                else:
+                    text = "None"
                 resources = groups.get(text, Resources())
                 resources.append(resource)
                 groups[text] = resources
