@@ -31,7 +31,7 @@ class Resources(list):
                 l.append(None)
 
         fig = PlotlyFigure(legend=dict(x=0, y=1.25)).line(
-            x, y, name=self[0].get("code").get("text")
+            x, y, name=self[0].get("code").get("text") if self else ""
         ).line(
             x, h, name="high", line_color='red',
         ).line(
@@ -53,6 +53,8 @@ class Laboratory:
         return len(self.entries)
 
     def group_by_code(self):
+        """Groups results by code.
+        """
         groups = dict()
         for entry in self.entries:
             resource = entry.get("resource")
@@ -73,4 +75,9 @@ class Laboratory:
                 resources = groups.get(text, Resources())
                 resources.append(resource)
                 groups[text] = resources
+        # Sort the resources in each group
+        for key in groups.keys():
+            resources = groups[key]
+            resources.sort(key=lambda x:x.get("issued"), reverse=True)
+            groups[key] = resources
         return groups

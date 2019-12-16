@@ -58,16 +58,15 @@ def index(request):
     authorization_code = request.GET.get("code")
     provider = request.session.get("provider")
     if authorization_code and provider:
+        logger.debug("Provider: %s, Authorization Code: %s" % (provider, authorization_code))
         token_json = exchange_token(provider, authorization_code)
         logger.debug(token_json)
-        request.session["access_token"] = token_json.get("access_token")
-        request.session["patient_id"] = token_json.get("patient")
-        logger.debug("Patient ID: %s" % request.session["patient_id"])
-        request.session["patient"] = get_patient_info(request)
-        request.session["expiration"] = timezone.now() + timezone.timedelta(seconds=3500)
-        if request.session["access_token"] and request.session["patient_id"]:
-            return redirect("pisces:home")
-        return HttpResponse("Authentication Failed.")
+        return initialize_session(request, token_json.get("access_token"), token_json.get("patient"))
+    access_token = request.GET.get("access_token")
+    patient_id = request.GET.get("patient_id")
+    if access_token and patient_id and provider:
+        logger.debug("Access code and patient ID found in GET request.")
+        return initialize_session(request, access_token, patient_id)
     providers = endpoints.load_providers()
     # Index page displays and clear the errors.
     errors = request.session.pop("errors", None)
@@ -78,6 +77,14 @@ def index(request):
         "errors": errors,
     })
 
+def initialize_session(request, access_token, patient_id):
+    request.session["access_token"] = access_token
+    request.session["patient_id"] = patient_id
+    request.session["patient"] = get_patient_info(request)
+    request.session["expiration"] = timezone.now() + timezone.timedelta(seconds=3500)
+    if request.session["access_token"] and request.session["patient_id"]:
+        return redirect("pisces:home")
+    return HttpResponse("Authentication Failed.")
 
 def authenticate(request):
     provider = request.GET.get("provider")
@@ -125,7 +132,6 @@ def view_observations(request, category):
     patient_id = request.session.get("patient_id")
     api = endpoints.initialize_api(request)
     response = api.get("Observation", patient=patient_id, category=category)
-    logger.debug(response.content)
     entries = None
     try:
         data = response.json()
@@ -148,7 +154,6 @@ def view_laboratory(request, code):
     patient_id = request.session.get("patient_id")
     api = endpoints.initialize_api(request)
     response = api.get("Observation", patient=patient_id, category="Laboratory")
-    logger.debug(response.content)
     entries = None
     try:
         data = response.json()
@@ -158,8 +163,13 @@ def view_laboratory(request, code):
     if not entries:
         return HttpResponse("Failed to obtain Laboratory data.")
     groups = observations.Laboratory(entries).group_by_code()
+    resources = groups.get(code)
+    if resources:
+        title = resources[0].get("code", dict()).get("text")
+    else:
+        title = "N/A"
     return render(request, "results.html", {
-        "title": "Laboratory Results",
+        "title": title,
         "data": data,
-        "resources": groups.get(code),
+        "resources": resources,
     })
