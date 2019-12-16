@@ -62,6 +62,7 @@ def index(request):
         logger.debug(token_json)
         request.session["access_token"] = token_json.get("access_token")
         request.session["patient_id"] = token_json.get("patient")
+        logger.debug("Patient ID: %s" % request.session["patient_id"])
         request.session["patient"] = get_patient_info(request)
         request.session["expiration"] = timezone.now() + timezone.timedelta(seconds=3500)
         if request.session["access_token"] and request.session["patient_id"]:
