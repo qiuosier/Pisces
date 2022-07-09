@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 import requests
 import re
 import ast
@@ -15,13 +16,13 @@ from Pisces import endpoints, observations
 logger = logging.getLogger(__name__)
 
 
-def exchange_token(provider, authorization_code):
+def exchange_token(provider, authorization_code, redirect_url):
     token_endpoint = endpoints.get_endpoint(provider, "token")
     client_id = EPIC_CLIENT_ID if provider != "Demo" else EPIC_TEST_ID
     data = {
         "grant_type": "authorization_code",
         "code": authorization_code,
-        "redirect_uri": EPIC_REDIRECT_URL,
+        "redirect_uri": redirect_url,
         "client_id": client_id
     }
     response = requests.post(token_endpoint, data, headers=dict(Accept="application/json"))
@@ -40,10 +41,12 @@ def get_patient_info(request):
             request.session["errors"] = "%s: %s" % (type(ex), str(ex))
             return None
         if response.status_code != 200:
-            request.session["errors"] = "Failed to get patient data.\n Response Code: %s.\n %s" % (
+            msg =  "Failed to get patient data.\n Response Code: %s.\n %s" % (
                 response.status_code, 
                 response.content
             )
+            logger.debug(msg)
+            request.session["errors"] = msg
             return None
         request.session["patient"] = response.json()
     return request.session.get("patient")
@@ -57,9 +60,14 @@ def logout(request):
 def index(request):
     authorization_code = request.GET.get("code")
     provider = request.session.get("provider")
+    if "localhost" in request.get_host():
+        redirect_uri = "http://" + request.get_host() + "/pisces"
+    else:
+        redirect_uri = EPIC_REDIRECT_URL
+    logger.debug("Provider: %s, Authorization Code: %s" % (provider, authorization_code))
     if authorization_code and provider:
         logger.debug("Provider: %s, Authorization Code: %s" % (provider, authorization_code))
-        token_json = exchange_token(provider, authorization_code)
+        token_json = exchange_token(provider, authorization_code, redirect_uri)
         logger.debug(token_json)
         return initialize_session(request, token_json.get("access_token"), token_json.get("patient"))
     access_token = request.GET.get("access_token")
@@ -91,21 +99,26 @@ def authenticate(request):
     request.session["provider"] = provider
     client_id = EPIC_CLIENT_ID if provider != "Demo" else EPIC_TEST_ID
     if provider == "Demo":
+        logger.debug("Connecting to sandbox...")
         request.session["access_token"] = "X"
         request.session["patient_id"] = "Tbt3KuCY0B5PSrJvCu2j-PlK.aiHsu2xUjUM8bWpetXoB"
         request.session["patient"] = get_patient_info(request)
         request.session["expiration"] = timezone.now() + timezone.timedelta(seconds=3500)
         return redirect("pisces:home")
-    authorize_endpoint = endpoints.get_endpoint(provider, "authorize")
-    if not authorize_endpoint:
-        return HttpResponse("Healthcare provider %s is currently not supported." % provider)
-        
-    redirect_url = "%s?response_type=code&client_id=%s&redirect_uri=%s" % (
-        authorize_endpoint,
-        client_id,
-        EPIC_REDIRECT_URL
-    )
-    return HttpResponseRedirect(redirect_url)
+    if "localhost" in request.get_host():
+        redirect_uri = "http://" + request.get_host() + "/pisces"
+    else:
+        redirect_uri = EPIC_REDIRECT_URL
+    try:
+        authenticate_url = endpoints.get_authentication_url(
+            client_id=client_id,
+            provider=provider,
+            redirect_uri=redirect_uri
+        )
+    except NotImplementedError as ex:
+        return HttpResponse(ex.args)
+    logger.debug("Redirect URL: %s" % authenticate_url)
+    return HttpResponseRedirect(authenticate_url)
 
 
 @authentication_required
@@ -137,7 +150,7 @@ def view_observations(request, category):
         data = response.json()
         entries = data.get("entry")
     except:
-        pass
+        traceback.print_exc()
     if not entries:
         return HttpResponse("Failed to obtain %s data." % category)
     groups = observation_class(entries).group_by_code()

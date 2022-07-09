@@ -6,9 +6,24 @@ from django.conf import settings
 from Aries.web import WebAPI
 
 
+ENDPOINT_BUNDLE_URL = "https://open.epic.com/Endpoints/DSTU2"
+
+
 def load_providers():
-    with open(os.path.join(settings.BASE_DIR, "Pisces", "EpicEndpoints.json")) as endpoint_json:
-        providers = json.load(endpoint_json).get("Entries")
+    """Load a list of provider names and endpoints from Epic.
+    """
+    response = requests.get(ENDPOINT_BUNDLE_URL).json()
+    providers = [
+        entry["resource"]
+        for entry in response["entry"]
+        if entry["resource"]["resourceType"] == "Endpoint"
+    ]
+    providers.append({
+        "resourceType": "Endpoint",
+        "name": "Demo",
+        "address": "https://open-ic.epic.com/FHIR/api/FHIR/DSTU2/"
+    })
+    providers.sort(key=lambda x: x["name"])
     return providers
 
 
@@ -33,16 +48,35 @@ def request_endpoint(meta_url, endpoint_name):
 
 def get_endpoint(provider, endpoint_name=None):
     for entry in PROVIDERS:
-        if entry.get("OrganizationName") == provider:
+        if entry.get("name") == provider:
             if not endpoint_name:
-                return entry.get("FHIRPatientFacingURI")
+                return entry.get("address")
             if entry.get(endpoint_name):
                 return entry.get(endpoint_name)
             else:
-                meta_url = entry.get("FHIRPatientFacingURI")
+                meta_url = entry.get("address")
                 if meta_url:
                     return request_endpoint(meta_url + "metadata", endpoint_name)
     return None
+
+
+def get_authentication_url(client_id, provider, redirect_uri):
+    authorize_endpoint = get_endpoint(provider, "authorize")
+
+    aud = None
+    for entry in PROVIDERS:
+        if entry.get("name") == provider:
+            aud = entry["address"]
+
+    if not authorize_endpoint or not aud:
+        raise NotImplementedError("Healthcare provider %s is currently not supported." % provider)
+
+    return "%s?response_type=code&client_id=%s&redirect_uri=%s&aud=%s" % (
+        authorize_endpoint,
+        client_id,
+        redirect_uri,
+        aud
+    )
 
 
 def initialize_api(request):
