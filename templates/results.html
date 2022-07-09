@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load pisces_tags %}
 
 {% block content %}
 
 <h1><a href="{% url 'pisces:observations' 'Laboratory' %}">Laboratory Results</a></h1>
 <h3>{{ resources.0.code.text }}</h3>
-<h4>{{ request.session.patient.name.0.text }}</h4>
+<p>{{ request.session.patient.name.0.text }}</p>
 
 <div class="md-raised-6px">
     {% if resources|length > 0 %}
@@ -12,20 +13,15 @@
     {% else %}
 
     {% endif %}
-    {% for reference in entry.resource.referenceRange %}
-    <p><i class="text-muted">{{ reference.text }}</i></p>
+    {% for reference in resources.0.referenceRange %}
+    <p class="text-muted">Reference Range: {{ reference.text }}</p>
     {% endfor %}
 </div>
-<h4>Raw Data</h4>
+<h3>Raw Data</h3>
 <div class="md-raised-6px">
     {% for resource in resources %}
-        <hr />
-        {{ resource.effectiveDateTime }}: {{ resource.valueQuantity.value }}
-        <pre>
-            <code>
-                {{ resource|pprint }}
-            </code>
-        </pre>
+        <hr />{{ resource.effectiveDateTime }}: {{ resource.valueQuantity.value }}
+        <pre><code class="language-json" style="overflow-x: scroll;">{{ resource|format_json }}</code></pre>
     {% endfor %}
 </div>
 
