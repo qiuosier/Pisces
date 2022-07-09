@@ -1,3 +1,4 @@
+import datetime
 import html
 from Aries.visual.plotly import PlotlyFigure
 
@@ -30,12 +31,22 @@ class Resources(list):
                 h.append(None)
                 l.append(None)
 
+        x_limit = x
+        if len(x) == 1:
+            x_m = datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%M:%SZ")
+            x_r = datetime.datetime.strftime(x_m + datetime.timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ")
+            x_l = datetime.datetime.strftime(x_m - datetime.timedelta(days=1), "%Y-%m-%dT%H:%M:%SZ")
+            x_limit = [x_l, x_m, x_r]
+            l = l * 2
+            h = h * 2
+
+
         fig = PlotlyFigure(legend=dict(x=0, y=1.25)).line(
             x, y, name=self[0].get("code").get("text") if self else ""
         ).line(
-            x, h, name="high", line_color='red',
+            x_limit, h, name="Reference Range - High", line_color='red',
         ).line(
-            x, l, name="low", line_color='indigo',
+            x_limit, l, name="Reference Range - Low", line_color='indigo',
         )
         return fig
 
@@ -78,6 +89,6 @@ class Laboratory:
         # Sort the resources in each group
         for key in groups.keys():
             resources = groups[key]
-            resources.sort(key=lambda x:x.get("issued"), reverse=True)
+            resources.sort(key=lambda x:x.get("effectiveDateTime"), reverse=True)
             groups[key] = resources
         return groups
