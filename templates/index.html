@@ -12,11 +12,11 @@
 {% endif %}
 <div class="row">
     {% for provider in providers %}
-    {% if provider.OrganizationName in top_providers %}
+    {% if provider.name in top_providers %}
     <div class="col-md-3 md-container">
         <div class="md-raised-6px" style="height: 80px">
-            <a href="{% url 'pisces:authenticate' %}?provider={{ provider.OrganizationName }}">
-                {{ provider.OrganizationName }}
+            <a href="{% url 'pisces:authenticate' %}?provider={{ provider.name }}">
+                {{ provider.name }}
             </a>
         </div>
     </div>
@@ -26,11 +26,11 @@
 <hr />
 <div class="row">
     {% for provider in providers %}
-    {% if provider.OrganizationName not in top_providers %}
+    {% if provider.name not in top_providers %}
     <div class="col-md-3 md-container">
         <div class="md-raised-6px" style="height: 80px">
-            <a href="{% url 'pisces:authenticate' %}?provider={{ provider.OrganizationName }}">
-                {{ provider.OrganizationName }}
+            <a href="{% url 'pisces:authenticate' %}?provider={{ provider.name }}">
+                {{ provider.name }}
             </a>
         </div>
     </div>
