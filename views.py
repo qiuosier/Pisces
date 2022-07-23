@@ -81,7 +81,7 @@ def index(request):
     return render(request, "index.html", {
         "title": "Pisces",
         "providers": providers,
-        "top_providers": ["Demo", "Duke Health"],
+        "top_providers": ["Demo"],
         "errors": errors,
     })
 
