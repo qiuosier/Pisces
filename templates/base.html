@@ -33,11 +33,14 @@
 <footer class="footer">
     <div class="container">
         <p class="text-muted">
-            &copy; 2015-2019
-            <a href="https://qqin.page/page/about/">Qiu Qin</a>.
+            &copy; 2015-2022
+            <a href="https://qqin.page/page/about/">Qiu Qin</a>
+            <span>&nbsp;|&nbsp;</span>
             <a href="https://qqin.page/page/sparrow/Pisces_Privacy/">Privacy</a>
-            |
+            <span>&nbsp;|&nbsp;</span>
+            <a href="https://github.com/qiuosier/Rhythm">Source Code</a>
             {% if request.session.patient %}
+            <span>&nbsp;|&nbsp;</span>
             <a href="{% url 'pisces:logout' %}">Logout</a>
             {% endif %}
         </p>
