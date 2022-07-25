@@ -33,9 +33,8 @@ PROVIDERS = load_providers()
 def request_endpoint(meta_url, endpoint_name):
     print(meta_url)
     response = requests.get(meta_url)
-    content = response.content
-    content_type = response.headers['Content-Type']
-    if "xml" in content_type:
+    content_type = response.headers.get('Content-Type')
+    if content_type and "xml" in content_type:
         root = etree.fromstring(response.content)
         extensions = root.findall(".//extension/extension", root.nsmap)
         for extension in extensions:
